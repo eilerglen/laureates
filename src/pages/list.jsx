@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 
 import styles from './page.module.css';
 
 import { CountryList } from '../components/country-list';
 import { SortingControl } from '../components/sorting-control';
+import { isContainRoute } from '../services/breadcrumbs';
+import { Breadcrumbs } from '../components/breadcrumbs';
 import { deserializeQuery, loadCountries, loadLaureates, serializeQuery } from '../services/api';
 
 export const ASC = 'asc';
@@ -44,7 +46,19 @@ export const ListPage = () => {
   const [personCountSorting, setPersonCountSorting] = useState('');
 
   const history = useHistory();
-  const { pathname, search } = useLocation();
+  const { pathname, search, state } = useLocation();
+  const { url, path } = useRouteMatch();
+  const match = useRouteMatch()
+  console.log(match)
+
+  useEffect(
+    () => {
+      if (state && !isContainRoute(state, url)) {
+        history.replace({ state: [...state, { path, url, title: 'List of Nobel laureates' }] });
+      }
+    },
+    [path, url, state, history, isContainRoute]
+  );
 
   const loadCountryInfo = async () => {
     setLoading(true);
@@ -124,9 +138,9 @@ export const ListPage = () => {
               ? DESC
               : ASC
             : ASC;
-            setPersonCountSorting(nextSortingValue);
-            setCountrySorting('');
-            query = getNextQuery(type, nextSortingValue);
+          setPersonCountSorting(nextSortingValue);
+          setCountrySorting('');
+          query = getNextQuery(type, nextSortingValue);
           break;
         }
         default: {
@@ -134,7 +148,10 @@ export const ListPage = () => {
         }
       }
 
+      const { state } = history.location;
+
       history.replace({
+        state,
         pathname,
         search: query
       });
@@ -145,6 +162,7 @@ export const ListPage = () => {
   return (
     <div className={styles.vertical_padding}>
       <header className={styles.horizontal_padding}>
+        <Breadcrumbs />
         <h1>List of Nobel laureates</h1>
       </header>
       <div className={styles.filters}>

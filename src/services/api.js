@@ -13,8 +13,8 @@ export const serializeQuery = queryParams =>
     return `${acc}${encodeURIComponent(key)}=${encodeURIComponent(value)}${postfix}`;
   }, '?');
 
-
-  export const loadLaureates = () =>
+// TODO: replace with server request
+export const loadLaureates = () =>
   fetch('https://code.s3.yandex.net/react/code/laureate.json').then(response => response.json()).then(({ laureates }) => laureates);
 // TODO: replace with server request
 export const loadCountries = () =>
